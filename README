@@ -1,0 +1,24 @@
+MMS-Mail-Parser
+
+This class takes an MMS message and parses it into two 'standard' formats (an MMS::MailMessage and MMS::MailMessage::ProviderParsed) for further use.  It is intended to make parsing MMS messages network/provider agnostic such that a 'standard' object results from parsing, independant of the net-work/provider it was sent through.
+
+A thorough tutorial can be accessed at http://www.robl.co.uk/redirects/articles/mmsmailparser/
+
+NOTE : THIS PACKAGE CONTAINS SAMPLE MESSAGES FOR EACH NETWORK PROVIDER AND THUS CAN BE A LARGE DOWNLOAD
+
+INSTALLATION
+
+To install this module, run the following commands:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2005 Rob Lee
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
