@@ -8,6 +8,7 @@ use MIME::Parser;
 
 use MMS::Mail::Message;
 use MMS::Mail::Parser;
+use MMS::Mail::Provider;
 
 #  These are eval'd so the user doesn't have to install all Providers
 eval {
@@ -20,11 +21,11 @@ MMS::Mail::Parser - A class for parsing MMS (or picture) messages.
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -207,6 +208,10 @@ Copyright 2005 Rob Lee, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<MMS::Mail::Message>, L<MMS::Mail::Message::Parsed>, L<MMS::Mail::Provider>, L<MMS::Mail::Provider>
 
 =cut
 

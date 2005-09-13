@@ -1,5 +1,7 @@
 Revision history for MMS-Mail-Parser
 
+0.02    11-Sep-2005 / 21:30
+        Added missing use MMS::Mail::Provider.
 0.01    11-Sep-2005 / 21:30
         First version, released on an unsuspecting world.
 
