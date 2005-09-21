@@ -1,5 +1,9 @@
 Revision history for MMS-Mail-Parser
 
+0.03    17-Sep-2005 / 16:40
+        Added ability to use MMS::Mail::Provider::02 parser for parsing UK02 messages.
+	Added evals around Provider parse calls to prevent errors when Providers are not installed.
+	Changed Providers from static class calls to objects supplied via provider method.
 0.02    11-Sep-2005 / 21:30
         Added missing use MMS::Mail::Provider.
 0.01    11-Sep-2005 / 21:30

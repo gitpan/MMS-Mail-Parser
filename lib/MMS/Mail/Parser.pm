@@ -13,6 +13,8 @@ use MMS::Mail::Provider;
 #  These are eval'd so the user doesn't have to install all Providers
 eval {
   require MMS::Mail::Provider::UKVodafone;
+  require MMS::Mail::Provider::UK02;
+  require MMS::Mail::Provider::UKOrange;
 };
 
 =head1 NAME
@@ -21,11 +23,11 @@ MMS::Mail::Parser - A class for parsing MMS (or picture) messages.
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
@@ -366,12 +368,15 @@ sub _recurse_message {
         print STDERR "Message contains ".$part->mime_type."\n" if ($self->debug);
 
         if ($part->mime_type eq 'text/plain') {
+          # Compile a complete body text and add to attachments for later
+          # parsing by Provider class
           if (defined($self->{message}->body_text())) {
             $self->{message}->body_text(($self->{message}->body_text()) . $bh->as_string);
           } else {
             $self->{message}->body_text($bh->as_string);
           }
-          $bh->purge;
+          print STDERR "Adding attachment to stack\n" if ($self->debug);
+          $self->{message}->add_attachment($part);
           next;
         }
 
@@ -419,12 +424,35 @@ sub _decipher {
     return $message;
   }
 
+  # NOTE : This section could be replaced by config file and dispatcher
+  # TODO : Add more error and debug output
+  #
+  # We eval here as it is possible the Provider classes are not installed
+  #
+
   if ($self->{message}->header_from =~ /vodafone.co.uk$/) {
     print STDERR "UKVodafone message type detected\n" if ($self->debug);
-    return MMS::Mail::Provider::UKVodafone::parse($self->{message});
+    my $provider = eval { new MMS::Mail::Provider::UKVodafone };
+    if (defined($@) && $@) { return undef; }
+    $self->provider($provider);
+    return $provider->parse($self->{message});
+  } elsif ($self->{message}->header_from =~ /mediamessaging.o2.co.uk$/) {
+    print STDERR "UK02 message type detected\n" if ($self->debug);
+    my $provider = eval { new MMS::Mail::Provider::UK02 };
+    if (defined($@) && $@) { return undef; }
+    $self->provider($provider);
+    return $provider->parse($self->{message});
+  } elsif ($self->{message}->header_from =~ /orangemms.net$/) {
+    print STDERR "UKOrange message type detected\n" if ($self->debug);
+    my $provider = eval { new MMS::Mail::Provider::UKOrange };
+    if (defined($@) && $@) { return undef; }
+    $self->provider($provider);
+    return $provider->parse($self->{message});
   } else {
     print STDERR "No message type detected using base provider\n" if ($self->debug);
-    return MMS::Mail::Provider::parse($self->{message});
+    my $provider = new MMS::Mail::Provider;
+    $self->provider($provider);
+    return $provider->parse($self->{message});
   }
 
 }
@@ -438,11 +466,17 @@ sub provider_parse {
     $self->{message} = $message;
   }
 
+  unless (defined($self->{message})) {
+    $self->_add_error("No MMS::Message available to parse");
+    print STDERR "No MMS::Message available to parse\n" if ($self->debug);
+    return undef;
+  }
+
   my $mms = $self->_decipher;
 
   unless (defined $mms) {
     $self->_add_error("Could not parse");
-    print STDERR "Could not parse\n" if ($self->debug);
+    print STDERR "No MMS::Message::Parsed was returned by Provider\n" if ($self->debug);
     return undef;
   }
 
