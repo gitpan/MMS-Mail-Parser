@@ -23,11 +23,11 @@ MMS::Mail::Parser - A class for parsing MMS (or picture) messages.
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 SYNOPSIS
 
@@ -100,6 +100,9 @@ There are a small set of miscellaneous methods available.  The output_dir method
     # Get/set the MIME::Parser object used by MMS::Parser
     $mmsparser->mime_parser($parser);
 
+    # Set the characters to be stripped from the returned MMS::Mail::Message and MMS::Mail::Message::Parsed objects
+    $mmsparser->strip_characters("\r\n");
+
 =head2 Tutorial
 
 A thorough tutorial can be accessed at http://www.robl.co.uk/redirects/articles/mmsmailparser/
@@ -124,7 +127,11 @@ Passed as an array reference, parser specifies the MIME::Parser object to use in
 
 =item debug INTEGER
 
-Passed as an array reference, debug determines whether debuging information is outputted to standard error (default 0)	
+Passed as an array reference, debug determines whether debuging information is outputted to standard error (defaults to 0).
+
+=item strip_characters STRING
+
+Pass as an array reference, strip_characters defines the characters to strip from the MMS::Mail::Message (and MMS::Mail::Message::Parsed) class header and text properties.
 
 =back
 
@@ -148,7 +155,7 @@ Returns an MMS::Mail::Message object by parsing the file specified in EXPR
 
 =item parse_two HEADFILE, BODYFILE
 
-Returns an MMS::Mail::Message object by parsing the header and body file specified in HEADFILE and BODYFILE
+Returns an MMS::Mail::Message object by parsing the header and body file specified in HEADFILE and BODYFILE filenames
 
 =item provider_parse MMS::MailMessage
 
@@ -165,6 +172,10 @@ Returns the MIME::Parser object used by MMS::Mail::Parser (if created) when invo
 =item provider MMS::Mail::Provider
 
 Returns an object for the currently set provider when invoked with no argument supplied.  When an argument is supplied it sets the provider to the supplied object.
+
+=item strip_characters STRING
+
+Returns the characters to be stripped from the returned MMS::Mail::Message and MMS::Mail::Message::Parsed objects.  When an argument is supplied it sets the strip characters to the supplied string.
 
 =item errors 
 
@@ -236,6 +247,12 @@ sub new {
     $self->{debug}=0;
   }
 
+  if (exists $args->{strip_characters}) {
+    $self->{strip_characters} = $args->{strip_characters};
+  } else {
+    $self->{strip_characters} = undef;
+  }
+
   $self->{message} = undef;
   $self->{errors} = [];
 
@@ -305,6 +322,9 @@ sub _parse {
   print STDERR "Created MIME::Parser\n" if ($self->debug);
 
   my $message = new MMS::Mail::Message;
+  if (defined $self->{strip_characters}) {
+    $message->strip_characters($self->strip_characters);
+  }
   $self->{message} = $message;
 
   print STDERR "Created MMS::Mail::Message\n" if ($self->debug);
@@ -557,6 +577,15 @@ sub provider {
 
   if (@_) { $self->{provider} = shift }
   return $self->{provider};
+
+}
+
+sub strip_characters {
+
+  my $self = shift;
+
+  if (@_) { $self->{strip_characters} = shift }
+  return $self->{strip_characters};
 
 }
 

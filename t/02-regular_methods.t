@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 10;
+use Test::More tests => 11;
 use MMS::Mail::Parser;
 use MIME::Parser;
 
@@ -20,4 +20,4 @@ is($mmsparser->debug(1),1);
 is($mmsparser->debug,1);
 is_deeply($mmsparser->errors,[]);
 is($mmsparser->last_error,undef);
-
+is($mmsparser->strip_characters("\r\n"),"\r\n");

@@ -1,5 +1,7 @@
 Revision history for MMS-Mail-Parser
 
+0.04    26-Sep-2005 / 12:30
+	Added strip_characters method and element to contructor to allow MMS::Mail::Message and MMS::Mail::Message character stripping
 0.03    17-Sep-2005 / 16:40
         Added ability to use MMS::Mail::Provider::02 parser for parsing UK02 messages.
 	Added evals around Provider parse calls to prevent errors when Providers are not installed.
