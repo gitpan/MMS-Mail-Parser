@@ -23,11 +23,11 @@ MMS::Mail::Parser - A class for parsing MMS (or picture) messages.
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 SYNOPSIS
 
@@ -35,7 +35,7 @@ This class takes an MMS message and parses it into two 'standard' formats (an MM
 
 =head2 Code usage example 
 
-This example demonstrates the use of the two stage parse.  The first pass provides an MMS::Mail::Message object that is then passed through to the provider_parse message that attempts to determine the Network provider the message was sent through and extracts the relevant information and places it into an MMS::Mail::Message::Parsed object.
+This example demonstrates the use of the two stage parse.  The first pass provides an MMS::Mail::Message object that is then passed through to the C<provider_parse> message that attempts to determine the Network provider the message was sent through and extracts the relevant information and places it into an MMS::Mail::Message::Parsed object.
 
     use MMS::Mail::Parser;
     my $mms = MMS::Mail::Parser->new();
@@ -63,7 +63,7 @@ MMS::Mail::Parser has the same input methods as MIME::Parser.
 
 =head2 Examples of parser modification
 
-MMS::Mail::Parser uses MIME::Parser as it's parsing engine.  The MMS::Mail::Parser class creates it's own MIME::Parser object if one is not passed in via the new or mime_parser methods.  There are a number of reasons for providing your own parser such as forcing all attachment storage to be done in memory than on disk (providing a speed increase to your application at the cost of memory usage).
+MMS::Mail::Parser uses MIME::Parser as it's parsing engine.  The MMS::Mail::Parser class creates it's own MIME::Parser object if one is not passed in via the C<new> or C<mime_parser> methods.  There are a number of reasons for providing your own parser such as forcing all attachment storage to be done in memory than on disk (providing a speed increase to your application at the cost of memory usage).
 
     my $parser = new MIME::Parser;
     $parser->output_to_core(1);
@@ -76,7 +76,7 @@ MMS::Mail::Parser uses MIME::Parser as it's parsing engine.  The MMS::Mail::Pars
 
 =head2 Examples of error handling
 
-The parser contains an error stack and will ultimately return an undef value from any of the main parse methods if an error occurs.  The last error message can be retreived by calling last_error method.
+The parser contains an error stack and will ultimately return an undef value from any of the main parse methods if an error occurs.  The last error message can be retreived by calling C<last_error> method.
 
     my $message = $mmsparser->parse(\*STDIN);
     unless (defined($message)) {
@@ -86,7 +86,7 @@ The parser contains an error stack and will ultimately return an undef value fro
 
 =head2 Miscellaneous methods
 
-There are a small set of miscellaneous methods available.  The output_dir method is provided so that a new MIME::Parser object does not have to be created to supply a separate storage directory for parsed attachments (however any attachments created as part of the process are removed when the message object is detroyed so the lack of specification of a storage location is not a huge issue ).
+There are a small set of miscellaneous methods available.  The C<output_dir> method is provided so that a new MIME::Parser object does not have to be created to supply a separate storage directory for parsed attachments (however any attachments created as part of the process are removed when the message object is detroyed so the lack of specification of a storage location is not a requirement for small scale message parsing ).
 
     # Provide debug ouput to STDERR
     $mmsparser->debug(1);
@@ -100,7 +100,8 @@ There are a small set of miscellaneous methods available.  The output_dir method
     # Get/set the MIME::Parser object used by MMS::Parser
     $mmsparser->mime_parser($parser);
 
-    # Set the characters to be stripped from the returned MMS::Mail::Message and MMS::Mail::Message::Parsed objects
+    # Set the characters to be stripped from the returned 
+    # MMS::Mail::Message and MMS::Mail::Message::Parsed objects
     $mmsparser->strip_characters("\r\n");
 
 =head2 Tutorial
@@ -115,23 +116,23 @@ The following are the top-level methods of MMS::Mail::Parser object.
 
 =over
 
-=item new()
+=item C<new()>
 
 Return a new MMS::Mail::Parser object. Valid attributes are:
 
 =over
 
-=item mime_parser MIME::Parser
+=item C<mime_parser> MIME::Parser
 
-Passed as an array reference, parser specifies the MIME::Parser object to use instead of MMS::Mail::Parser creating it's own.
+Passed as an array reference, C<parser> specifies the MIME::Parser object to use instead of MMS::Mail::Parser creating it's own.
 
-=item debug INTEGER
+=item C<debug> INTEGER
 
-Passed as an array reference, debug determines whether debuging information is outputted to standard error (defaults to 0).
+Passed as an array reference, C<debug> determines whether debuging information is outputted to standard error (defaults to 0).
 
-=item strip_characters STRING
+=item C<strip_characters> STRING
 
-Pass as an array reference, strip_characters defines the characters to strip from the MMS::Mail::Message (and MMS::Mail::Message::Parsed) class header and text properties.
+Pass as an array reference, C<strip_characters> defines the characters to strip from the MMS::Mail::Message (and MMS::Mail::Message::Parsed) class C<header_*> and C<body_text> properties.
 
 =back
 
@@ -141,51 +142,51 @@ Pass as an array reference, strip_characters defines the characters to strip fro
 
 =over
 
-=item parse INSTREAM
+=item C<parse> INSTREAM
 
 Returns an MMS::Mail::Message object by parsing the input stream INSTREAM
 
-=item parse_data DATA 
+=item C<parse_data> DATA 
 
 Returns an MMS::Mail::Message object by parsing the in memory string DATA
 
-=item parse_open EXPR
+=item C<parse_open> EXPR
 
 Returns an MMS::Mail::Message object by parsing the file specified in EXPR
 
-=item parse_two HEADFILE, BODYFILE
+=item C<parse_two> HEADFILE, BODYFILE
 
 Returns an MMS::Mail::Message object by parsing the header and body file specified in HEADFILE and BODYFILE filenames
 
-=item provider_parse MMS::MailMessage
+=item C<provider_parse> MMS::MailMessage
 
-Returns an MMS::Mail::Message::Parsed object by attempting to discover the network provider the message was sent through and parsing through the appropriate MMS::ProviderMailParser.  If an MMS::MailMessage object is supplied as an argument then the provider_parse method will parse the supplied MMS::Mail::Message object.  If a provider has been set via the provider method then that parser will be used by the provider_parse method instead of attempting to discover the network provider from the MMS::Mail::Message.
+Returns an MMS::Mail::Message::Parsed object by attempting to discover the network provider the message was sent through and parsing through the appropriate MMS::ProviderMailParser.  If an MMS::MailMessage object is supplied as an argument then the C<provider_parse> method will parse the supplied MMS::Mail::Message object.  If a provider has been set via the provider method then that parser will be used by the C<provider_parse> method instead of attempting to discover the network provider from the MMS::Mail::Message.
 
-=item output_dir DIRECTORY
+=item C<output_dir> DIRECTORY
 
-Returns the output_dir parameter used with the MIME::Parser object when invoked with no argument supplied.  When an argument is supplied it sets the output_dir used by the MIME::Parser to the value of the argument supplied.
+Returns the C<output_dir> parameter used with the MIME::Parser object when invoked with no argument supplied.  When an argument is supplied it sets the C<output_dir> property used by the MIME::Parser to the value of the argument supplied.
 
-=item mime_parser MIME::Parser
+=item C<mime_parser> MIME::Parser
 
 Returns the MIME::Parser object used by MMS::Mail::Parser (if created) when invoked with no argument supplied.  When an argument is supplied it sets the MIME::Parser object used by MMS::Mail::Parser to parse messages.
 
-=item provider MMS::Mail::Provider
+=item C<provider> MMS::Mail::Provider
 
-Returns an object for the currently set provider when invoked with no argument supplied.  When an argument is supplied it sets the provider to the supplied object.
+Returns an object for the currently set provider property when invoked with no argument supplied.  When an argument is supplied it sets the provider to the supplied object.
 
-=item strip_characters STRING
+=item C<strip_characters> STRING
 
 Returns the characters to be stripped from the returned MMS::Mail::Message and MMS::Mail::Message::Parsed objects.  When an argument is supplied it sets the strip characters to the supplied string.
 
-=item errors 
+=item C<errors>
 
 Returns the error stack used by the MMS::Mail::Parser object as an array reference.
 
-=item last_error
+=item C<last_error>
 
 Returns the last error from the stack.
 
-=item debug INTEGER
+=item C<debug> INTEGER
 
 Returns a number indicating whether STDERR debugging output is active (1) or not (0).  When an argument is supplied it sets the debug property to that value.
 
@@ -205,7 +206,7 @@ your bug as I make changes.
 
 =head1 NOTES
 
-To quote the perl artistic license ('perldoc perlartistic') :
+Please read the Perl artistic license ('perldoc perlartistic') :
 
 10. THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
     WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES
@@ -224,7 +225,7 @@ under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<MMS::Mail::Message>, L<MMS::Mail::Message::Parsed>, L<MMS::Mail::Provider>, L<MMS::Mail::Provider>
+L<MMS::Mail::Message>, L<MMS::Mail::Message::Parsed>, L<MMS::Mail::Provider>
 
 =cut
 

@@ -1,5 +1,7 @@
 Revision history for MMS-Mail-Parser
 
+0.05	29-Sep-2005 / 11:14
+	Improved pod by adding formatting codes
 0.04    26-Sep-2005 / 12:30
 	Added strip_characters method and element to contructor to allow MMS::Mail::Message and MMS::Mail::Message character stripping
 0.03    17-Sep-2005 / 16:40
