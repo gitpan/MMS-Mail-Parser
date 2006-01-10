@@ -14,6 +14,7 @@ WriteMakefile(
 	'MMS::Mail::Message::Parsed' => 0,
 	'MIME::Parser' => 5.4,
 	'MMS::Mail::Provider' => 0,
+	'Class::Accessor' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'MMS-Mail-Parser-*' },

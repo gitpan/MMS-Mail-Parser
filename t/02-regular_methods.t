@@ -6,6 +6,7 @@ use MIME::Parser;
 
 use MMS::Mail::Provider;
 
+my $errors = [];
 my $mmsparser = new MMS::Mail::Parser;
 my $parser= new MIME::Parser;
 my $providermailparser = new MMS::Mail::Provider;
@@ -18,6 +19,6 @@ is($mmsparser->provider($providermailparser),$providermailparser);
 isa_ok($mmsparser->provider(),'MMS::Mail::Provider');
 is($mmsparser->debug(1),1);
 is($mmsparser->debug,1);
-is_deeply($mmsparser->errors,[]);
+is_deeply($mmsparser->errors,$errors);
 is($mmsparser->last_error,undef);
 is($mmsparser->strip_characters("\r\n"),"\r\n");

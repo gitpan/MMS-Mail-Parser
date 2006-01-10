@@ -2,6 +2,9 @@ package MMS::Mail::Parser;
 
 use warnings;
 use strict;
+
+use base "Class::Accessor";
+
 use IO::Wrap;
 use IO::File;
 use MIME::Parser;
@@ -15,19 +18,21 @@ eval {
   require MMS::Mail::Provider::UKVodafone;
   require MMS::Mail::Provider::UK02;
   require MMS::Mail::Provider::UKOrange;
+  require MMS::Mail::Provider::UKTMobile;
+  require MMS::Mail::Provider::UKVirgin;
 };
 
 =head1 NAME
 
-MMS::Mail::Parser - A class for parsing MMS (or picture) messages.
+MMS::Mail::Parser - A class for parsing MMS (or picture) messages via email.
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 SYNOPSIS
 
@@ -42,7 +47,7 @@ This example demonstrates the use of the two stage parse.  The first pass provid
     my $message = $mms->parse(\*STDIN);
     if (defined($message)) {
       my $parsed = $mms->provider_parse;
-      print $parsed->subject."\n";
+      print $parsed->header_subject."\n";
     }
 
 =head2 Examples of input
@@ -104,6 +109,13 @@ There are a small set of miscellaneous methods available.  The C<output_dir> met
     # MMS::Mail::Message and MMS::Mail::Message::Parsed objects
     $mmsparser->strip_characters("\r\n");
 
+    # Set the regular expression map for accessors
+    # Removes trailing EOL chars from subject and body accessors
+    my $map = { header_subject => 's/\n$//g',
+                header_datetime => 's/\n$//g'
+              };
+    $mmsparser->cleanse_map($map);
+
 =head2 Tutorial
 
 A thorough tutorial can be accessed at http://www.robl.co.uk/redirects/articles/mmsmailparser/
@@ -124,15 +136,19 @@ Return a new MMS::Mail::Parser object. Valid attributes are:
 
 =item C<mime_parser> MIME::Parser
 
-Passed as an array reference, C<parser> specifies the MIME::Parser object to use instead of MMS::Mail::Parser creating it's own.
+Passed as a hash reference, C<parser> specifies the MIME::Parser object to use instead of MMS::Mail::Parser creating it's own.
 
 =item C<debug> INTEGER
 
-Passed as an array reference, C<debug> determines whether debuging information is outputted to standard error (defaults to 0).
+Passed as a hash reference, C<debug> determines whether debuging information is outputted to standard error (defaults to 0).
 
 =item C<strip_characters> STRING
 
-Pass as an array reference, C<strip_characters> defines the characters to strip from the MMS::Mail::Message (and MMS::Mail::Message::Parsed) class C<header_*> and C<body_text> properties.
+Passed as a hash reference, C<strip_characters> defines the characters to strip from the MMS::Mail::Message (and MMS::Mail::Message::Parsed) class C<header_*> and C<body_text> properties.
+
+=item C<cleanse_map> HASH REF
+
+Passed as a hash reference, C<cleanse_map> defines regexes (or function references) to apply to instance properties from the MMS::Mail::Message (and MMS::Mail::Message::Parsed) classes.
 
 =back
 
@@ -144,57 +160,63 @@ Pass as an array reference, C<strip_characters> defines the characters to strip 
 
 =item C<parse> INSTREAM
 
-Returns an MMS::Mail::Message object by parsing the input stream INSTREAM
+Instance method - Returns an MMS::Mail::Message object by parsing the input stream INSTREAM
 
 =item C<parse_data> DATA 
 
-Returns an MMS::Mail::Message object by parsing the in memory string DATA
+Instance method - Returns an MMS::Mail::Message object by parsing the in memory string DATA
 
 =item C<parse_open> EXPR
 
-Returns an MMS::Mail::Message object by parsing the file specified in EXPR
+Instance method - Returns an MMS::Mail::Message object by parsing the file specified in EXPR
 
 =item C<parse_two> HEADFILE, BODYFILE
 
-Returns an MMS::Mail::Message object by parsing the header and body file specified in HEADFILE and BODYFILE filenames
+Instance method - Returns an MMS::Mail::Message object by parsing the header and body file specified in HEADFILE and BODYFILE filenames
 
 =item C<provider_parse> MMS::MailMessage
 
-Returns an MMS::Mail::Message::Parsed object by attempting to discover the network provider the message was sent through and parsing through the appropriate MMS::ProviderMailParser.  If an MMS::MailMessage object is supplied as an argument then the C<provider_parse> method will parse the supplied MMS::Mail::Message object.  If a provider has been set via the provider method then that parser will be used by the C<provider_parse> method instead of attempting to discover the network provider from the MMS::Mail::Message.
+Instance method - Returns an MMS::Mail::Message::Parsed object by attempting to discover the network provider the message was sent through and parsing through the appropriate MMS::ProviderMailParser.  If an MMS::MailMessage object is supplied as an argument then the C<provider_parse> method will parse the supplied MMS::Mail::Message object.  If a provider has been set via the provider method then that parser will be used by the C<provider_parse> method instead of attempting to discover the network provider from the MMS::Mail::Message.
 
 =item C<output_dir> DIRECTORY
 
-Returns the C<output_dir> parameter used with the MIME::Parser object when invoked with no argument supplied.  When an argument is supplied it sets the C<output_dir> property used by the MIME::Parser to the value of the argument supplied.
+Instance method - Returns the C<output_dir> parameter used with the MIME::Parser object when invoked with no argument supplied.  When an argument is supplied it sets the C<output_dir> property used by the MIME::Parser to the value of the argument supplied.
 
 =item C<mime_parser> MIME::Parser
 
-Returns the MIME::Parser object used by MMS::Mail::Parser (if created) when invoked with no argument supplied.  When an argument is supplied it sets the MIME::Parser object used by MMS::Mail::Parser to parse messages.
+Instance method - Returns the MIME::Parser object used by MMS::Mail::Parser (if created) when invoked with no argument supplied.  When an argument is supplied it sets the MIME::Parser object used by MMS::Mail::Parser to parse messages.
 
 =item C<provider> MMS::Mail::Provider
 
-Returns an object for the currently set provider property when invoked with no argument supplied.  When an argument is supplied it sets the provider to the supplied object.
+Instance method - Returns an object for the currently set provider property when invoked with no argument supplied.  When an argument is supplied it sets the provider to the supplied object.
 
 =item C<strip_characters> STRING
 
-Returns the characters to be stripped from the returned MMS::Mail::Message and MMS::Mail::Message::Parsed objects.  When an argument is supplied it sets the strip characters to the supplied string.
+Instance method - Returns the characters to be stripped from the returned MMS::Mail::Message and MMS::Mail::Message::Parsed objects.  When an argument is supplied it sets the strip characters to the supplied string.
+
+=item C<cleanse_map> HASHREF
+
+Instance method - This method allows a regular expression or subroutine reference to be applied when an accessor sets a value, allowing message values to be cleansed or modified. These accessors are C<header_from>, C<header_to>, C<body_text>, C<header_datetime> and C<header_subject>.
+
+The method expects a hash reference with key values as one of the above public accessor method names and values as a scalar in the form of a regular expression or as a subroutine reference.
 
 =item C<errors>
 
-Returns the error stack used by the MMS::Mail::Parser object as an array reference.
+Instance method - Returns the error stack used by the MMS::Mail::Parser object as an array reference.
 
 =item C<last_error>
 
-Returns the last error from the stack.
+Instance method - Returns the last error from the stack.
 
 =item C<debug> INTEGER
 
-Returns a number indicating whether STDERR debugging output is active (1) or not (0).  When an argument is supplied it sets the debug property to that value.
+Instance method - Returns a number indicating whether STDERR debugging output is active (1) or not (0).  When an argument is supplied it sets the debug property to that value.
 
 =back
 
 =head1 AUTHOR
 
-Rob Lee, C<< <robl@robl.co.uk> >>
+Rob Lee, C<< <robl at robl.co.uk> >>
 
 =head1 BUGS
 
@@ -229,35 +251,49 @@ L<MMS::Mail::Message>, L<MMS::Mail::Message::Parsed>, L<MMS::Mail::Provider>
 
 =cut
 
+my @Accessors=( "message",
+                "mime_parser",
+                "debug",
+		"errors",
+		"output_dir",
+		"provider",
+		"strip_characters",
+		"cleanse_map"
+                );
+
+# Class data retrieval
+sub _Accessors {
+  return \@Accessors;
+}
+
+__PACKAGE__->mk_accessors(@{__PACKAGE__->_Accessors});
+
+
 sub new {
+
   my $type = shift;
-  my $args = {@_};
+  my $self = SUPER::new $type( {@_} );
 
-  my $self = {};
-  bless $self, $type;
-
-  if (exists $args->{mime_parser}) {
-    $self->{mime_parser} = $args->{mime_parser};
-  } else {
-    $self->{mime_parser} = undef;
+  # Set defaults
+  unless (defined $self->get('debug')) {
+    $self->set('debug',0);
   }
-
-  if (exists $args->{debug}) {
-    $self->{debug} = $args->{debug};
-  } else {
-    $self->{debug}=0;
+  unless (defined $self->get('mime_parser')) {
+    $self->set('mime_parser',undef);
   }
-
-  if (exists $args->{strip_characters}) {
-    $self->{strip_characters} = $args->{strip_characters};
-  } else {
-    $self->{strip_characters} = undef;
+  unless (defined $self->get('strip_characters')) {
+    $self->set('strip_characters',undef);
   }
-
-  $self->{message} = undef;
-  $self->{errors} = [];
+  unless (defined $self->get('cleanse_map')) {
+    $self->set('cleanse_map',undef);
+  }
+  unless (defined $self->get('message')) {
+    $self->set('message',undef);
+  }
+  $self->set('errors',[]);
 
   return $self;
+
 }
 
 sub parse {
@@ -305,14 +341,15 @@ sub _parse {
   my $self = shift;
   my $in = shift;
 
+  # Set up a default parser
   unless (defined $self->mime_parser) {
     my $parser = new MIME::Parser;
     $parser->ignore_errors(1);
-    $self->{mime_parser} = $parser;
+    $self->mime_parser($parser);
   }
 
   if (defined $self->output_dir) {
-    $self->{mime_parser}->output_dir($self->output_dir);
+    $self->mime_parser->output_dir($self->output_dir);
   }
 
   unless (defined $self->mime_parser) {
@@ -323,14 +360,17 @@ sub _parse {
   print STDERR "Created MIME::Parser\n" if ($self->debug);
 
   my $message = new MMS::Mail::Message;
-  if (defined $self->{strip_characters}) {
+  if (defined $self->strip_characters) {
     $message->strip_characters($self->strip_characters);
   }
-  $self->{message} = $message;
+  if (defined $self->cleanse_map) {
+    $message->cleanse_map($self->cleanse_map);
+  }
+  $self->message($message);
 
   print STDERR "Created MMS::Mail::Message\n" if ($self->debug);
 
-  my $parsed = eval { $self->{mime_parser}->parse($in) };
+  my $parsed = eval { $self->mime_parser->parse($in) };
   if (defined $@ && $@) {
     $self->_add_error($@);
   }
@@ -341,7 +381,7 @@ sub _parse {
 
   print STDERR "Parsed message\n" if ($self->debug);
 
-  unless ($self->{message}->is_valid) {
+  unless ($self->message->is_valid) {
     $self->_add_error("Parsed message is not valid");
     print STDERR "Parsed message is not valid\n" if ($self->debug);
     return undef;
@@ -349,7 +389,7 @@ sub _parse {
 
   print STDERR "Parsed message is valid\n" if ($self->debug);
 
-  return $self->{message};
+  return $self->message;
 
 }
 
@@ -366,18 +406,18 @@ sub _recurse_message {
   print STDERR "Parsing MIME Message\n" if ($self->debug);
 
   my $header = $mime->head;
-  unless (defined($self->{message}->header_from)) {
-    $self->{message}->header_datetime($header->get('Date'));
-    $self->{message}->header_from($header->get('From'));
-    $self->{message}->header_to($header->get('To'));
-    $self->{message}->header_subject($header->get('Subject'));
+  unless (defined($self->message->header_from)) {
+    $self->message->header_datetime($header->get('Date'));
+    $self->message->header_from($header->get('From'));
+    $self->message->header_to($header->get('To'));
+    $self->message->header_subject($header->get('Subject'));
     print STDERR "Parsed Headers\n" if ($self->debug);
   }
 
   my @multiparts;
 
   if($mime->parts == 0) {
-    $self->{message}->body_text($mime->bodyhandle->as_string);
+    $self->message->body_text($mime->bodyhandle->as_string);
     print STDERR "No parts to MIME mail - grabbing header text\n" if ($self->debug);
     $mime->bodyhandle->purge;
   }
@@ -391,13 +431,13 @@ sub _recurse_message {
         if ($part->mime_type eq 'text/plain') {
           # Compile a complete body text and add to attachments for later
           # parsing by Provider class
-          if (defined($self->{message}->body_text())) {
-            $self->{message}->body_text(($self->{message}->body_text()) . $bh->as_string);
+          if (defined($self->message->body_text())) {
+            $self->message->body_text(($self->message->body_text()) . $bh->as_string);
           } else {
-            $self->{message}->body_text($bh->as_string);
+            $self->message->body_text($bh->as_string);
           }
           print STDERR "Adding attachment to stack\n" if ($self->debug);
-          $self->{message}->add_attachment($part);
+          $self->message->add_attachment($part);
           next;
         }
 
@@ -407,7 +447,7 @@ sub _recurse_message {
           next;
         } else {
           print STDERR "Adding attachment to stack\n" if ($self->debug);
-          $self->{message}->add_attachment($part);
+          $self->message->add_attachment($part);
         }
 
     }
@@ -425,7 +465,7 @@ sub _decipher {
 
   my $self = shift;
 
-  unless (defined($self->{message})) {
+  unless (defined($self->message)) {
     $self->_add_error("No MMS mail message supplied");
     return undef;
   }
@@ -433,7 +473,7 @@ sub _decipher {
   if (defined($self->provider)) {
     my $message;
     #eval( 'require '.$self->provider.';'.'$message='.$self->provider.'::parse($self->{message})');
-    $message = $self->provider->parse($self->{message});
+    $message = $self->provider->parse($self->message);
 
     unless (defined $message) {
       print STDERR "Failed to parse message with custom Provider Object\n" if ($self->debug);
@@ -451,29 +491,41 @@ sub _decipher {
   # We eval here as it is possible the Provider classes are not installed
   #
 
-  if ($self->{message}->header_from =~ /vodafone.co.uk$/) {
+  if ($self->message->header_from =~ /vodafone.co.uk$/) {
     print STDERR "UKVodafone message type detected\n" if ($self->debug);
     my $provider = eval { new MMS::Mail::Provider::UKVodafone };
     if (defined($@) && $@) { return undef; }
     $self->provider($provider);
-    return $provider->parse($self->{message});
-  } elsif ($self->{message}->header_from =~ /mediamessaging.o2.co.uk$/) {
+    return $provider->parse($self->message);
+  } elsif ($self->message->header_from =~ /mediamessaging.o2.co.uk$/) {
     print STDERR "UK02 message type detected\n" if ($self->debug);
     my $provider = eval { new MMS::Mail::Provider::UK02 };
     if (defined($@) && $@) { return undef; }
     $self->provider($provider);
-    return $provider->parse($self->{message});
-  } elsif ($self->{message}->header_from =~ /orangemms.net$/) {
+    return $provider->parse($self->message);
+  } elsif ($self->message->header_from =~ /orangemms.net$/) {
     print STDERR "UKOrange message type detected\n" if ($self->debug);
     my $provider = eval { new MMS::Mail::Provider::UKOrange };
     if (defined($@) && $@) { return undef; }
     $self->provider($provider);
-    return $provider->parse($self->{message});
+    return $provider->parse($self->message);
+  } elsif ($self->message->header_from =~ /t-mobile.co.uk/) {
+    print STDERR "T-Mobile message type detected\n" if ($self->debug);
+    my $provider = eval { new MMS::Mail::Provider::UKTMobile };
+    if (defined($@) && $@) { return undef; }
+    $self->provider($provider);
+    return $provider->parse($self->message);
+  } elsif ($self->message->header_from =~ /virginmobilemessaging.co.uk/) {
+    print STDERR "Virgin message type detected\n" if ($self->debug);
+    my $provider = eval { new MMS::Mail::Provider::UKVirgin };
+    if (defined($@) && $@) { return undef; }
+    $self->provider($provider);
+    return $provider->parse($self->message);
   } else {
     print STDERR "No message type detected using base provider\n" if ($self->debug);
     my $provider = new MMS::Mail::Provider;
     $self->provider($provider);
-    return $provider->parse($self->{message});
+    return $provider->parse($self->message);
   }
 
 }
@@ -484,10 +536,10 @@ sub provider_parse {
   my $message = shift;
   
   if (defined($message)) {
-    $self->{message} = $message;
+    $self->message($message);
   }
 
-  unless (defined($self->{message})) {
+  unless (defined($self->message)) {
     $self->_add_error("No MMS::Message available to parse");
     print STDERR "No MMS::Message available to parse\n" if ($self->debug);
     return undef;
@@ -506,31 +558,6 @@ sub provider_parse {
   return $mms;
 }
 
-sub debug {
-
-  my $self = shift;
-  my $debug = shift;
-
-  unless (defined $debug) {
-    if (exists($self->{debug})) {
-      return $self->{debug};
-    } else {
-      return undef;
-    }
-  }
-  chomp($debug);
-  $self->{debug}=$debug;
-}
-
-sub mime_parser {
-
-  my $self = shift;
-
-  if (@_) { $self->{mime_parser} = shift }
-  return $self->{mime_parser};
-
-}
-
 sub _add_error {
 
   my $self = shift;
@@ -539,54 +566,20 @@ sub _add_error {
   unless (defined $error) {
     return 0;
   }
-  push @{$self->{errors}}, $error;
+  push @{$self->errors}, $error;
 
   return 1;
-}
-
-sub errors {
-
-  my $self = shift;
-  return $self->{errors};
-
 }
 
 sub last_error {
 
   my $self = shift;
 
-  if (@{$self->{errors}} > 0) {
-    return ((pop @{$self->{errors}})."\n");
+  if (@{$self->errors} > 0) {
+    return ((pop @{$self->errors})."\n");
   } else {
     return undef;
   }
-
-}
-
-sub output_dir {
-
-  my $self = shift;
-
-  if (@_) { $self->{output} = shift }
-  return $self->{output};
-
-}
-
-sub provider {
-
-  my $self = shift;
-
-  if (@_) { $self->{provider} = shift }
-  return $self->{provider};
-
-}
-
-sub strip_characters {
-
-  my $self = shift;
-
-  if (@_) { $self->{strip_characters} = shift }
-  return $self->{strip_characters};
 
 }
 
