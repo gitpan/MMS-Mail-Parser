@@ -1,6 +1,8 @@
 Revision history for MMS-Mail-Parser
 
-0.05	09-Jan-2005 / 16:00
+0.07    13-Jan-2005 / 17:50
+        Updated dependancies to include version numbers for MMS classes
+0.06	09-Jan-2005 / 16:00
 	Used Class::Accessor to manage accessors
 	Updated README
 	Improved pod
