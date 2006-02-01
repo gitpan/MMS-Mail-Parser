@@ -3,7 +3,7 @@ NAME
     email.
 
 VERSION
-    Version 0.07
+    Version 0.09
 
 SYNOPSIS
     This class takes an MMS message and parses it into two 'standard'
@@ -103,8 +103,8 @@ SYNOPSIS
         $mmsparser->cleanse_map($map);
 
   Tutorial
-    A thorough tutorial can be accessed at
-    http://www.robl.co.uk/redirects/articles/mmsmailparser/
+    A tutorial can be accessed at
+    http://www.monkeyhelper.com/2006/02/roll_your_own_flickrpoddr_or_v.html
 
 METHODS
     The following are the top-level methods of MMS::Mail::Parser object.

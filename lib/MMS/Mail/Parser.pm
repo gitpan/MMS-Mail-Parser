@@ -20,6 +20,7 @@ eval {
   require MMS::Mail::Provider::UKOrange;
   require MMS::Mail::Provider::UKTMobile;
   require MMS::Mail::Provider::UKVirgin;
+  require MMS::Mail::Provider::UK3;
 };
 
 =head1 NAME
@@ -28,11 +29,11 @@ MMS::Mail::Parser - A class for parsing MMS (or picture) messages via email.
 
 =head1 VERSION
 
-Version 0.07
+Version 0.09
 
 =cut
 
-our $VERSION = '0.07';
+our $VERSION = '0.09';
 
 =head1 SYNOPSIS
 
@@ -118,7 +119,7 @@ There are a small set of miscellaneous methods available.  The C<output_dir> met
 
 =head2 Tutorial
 
-A thorough tutorial can be accessed at http://www.robl.co.uk/redirects/articles/mmsmailparser/
+A tutorial can be accessed at http://www.monkeyhelper.com/2006/02/roll_your_own_flickrpoddr_or_v.html
 
 =head1 METHODS
 
@@ -518,6 +519,12 @@ sub _decipher {
   } elsif ($self->message->header_from =~ /virginmobilemessaging.co.uk/) {
     print STDERR "Virgin message type detected\n" if ($self->debug);
     my $provider = eval { new MMS::Mail::Provider::UKVirgin };
+    if (defined($@) && $@) { return undef; }
+    $self->provider($provider);
+    return $provider->parse($self->message);
+  } elsif ($self->message->header_from =~ /mms.three.co.uk/) {
+    print STDERR "3 message type detected\n" if ($self->debug);
+    my $provider = eval { new MMS::Mail::Provider::UK3 };
     if (defined($@) && $@) { return undef; }
     $self->provider($provider);
     return $provider->parse($self->message);
