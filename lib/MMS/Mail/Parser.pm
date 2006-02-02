@@ -29,11 +29,11 @@ MMS::Mail::Parser - A class for parsing MMS (or picture) messages via email.
 
 =head1 VERSION
 
-Version 0.09
+Version 0.08
 
 =cut
 
-our $VERSION = '0.09';
+our $VERSION = '0.08';
 
 =head1 SYNOPSIS
 
@@ -119,7 +119,7 @@ There are a small set of miscellaneous methods available.  The C<output_dir> met
 
 =head2 Tutorial
 
-A tutorial can be accessed at http://www.monkeyhelper.com/2006/02/roll_your_own_flickrpoddr_or_v.html
+A thorough tutorial can be accessed at http://www.robl.co.uk/redirects/articles/mmsmailparser/
 
 =head1 METHODS
 
