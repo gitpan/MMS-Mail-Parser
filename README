@@ -3,7 +3,7 @@ NAME
     email.
 
 VERSION
-    Version 0.08
+    Version 0.10
 
 SYNOPSIS
     This class takes an MMS message and parses it into two 'standard'
@@ -14,10 +14,10 @@ SYNOPSIS
 
   Code usage example
     This example demonstrates the use of the two stage parse. The first pass
-    provides an MMS::Mail::Message object that is then passed through to the
-    "provider_parse" message that attempts to determine the Network provider
-    the message was sent through and extracts the relevant information and
-    places it into an MMS::Mail::Message::Parsed object.
+    provides an MMS::Mail::Message instance that is then passed through to
+    the "provider_parse" method that attempts to determine the Network
+    provider the message was sent through and extracts the relevant
+    information and parses it into an MMS::Mail::Message::Parsed instance.
 
         use MMS::Mail::Parser;
         my $mms = MMS::Mail::Parser->new();
@@ -44,9 +44,9 @@ SYNOPSIS
 
   Examples of parser modification
     MMS::Mail::Parser uses MIME::Parser as it's parsing engine. The
-    MMS::Mail::Parser class creates it's own MIME::Parser object if one is
+    MMS::Mail::Parser class creates it's own MIME::Parser instance if one is
     not passed in via the "new" or "mime_parser" methods. There are a number
-    of reasons for providing your own parser such as forcing all attachment
+    of reasons for providing your own parser, such as forcing all attachment
     storage to be done in memory than on disk (providing a speed increase to
     your application at the cost of memory usage).
 
@@ -72,12 +72,11 @@ SYNOPSIS
 
   Miscellaneous methods
     There are a small set of miscellaneous methods available. The
-    "output_dir" method is provided so that a new MIME::Parser object does
+    "output_dir" method is provided so that a new MIME::Parser instance does
     not have to be created to supply a separate storage directory for parsed
     attachments (however any attachments created as part of the process are
-    removed when the message object is detroyed so the lack of specification
-    of a storage location is not a requirement for small scale message
-    parsing ).
+    removed when the message is destroyed so the lack of specification of a
+    storage location is not a requirement for small scale message parsing ).
 
         # Provide debug ouput to STDERR
         $mmsparser->debug(1);
@@ -88,11 +87,11 @@ SYNOPSIS
         # Get/set an array reference to the error stack
         my $errors = $mmsparser->errors;
 
-        # Get/set the MIME::Parser object used by MMS::Parser
+        # Get/set the MIME::Parser instance used by MMS::Parser
         $mmsparser->mime_parser($parser);
 
         # Set the characters to be stripped from the returned 
-        # MMS::Mail::Message and MMS::Mail::Message::Parsed objects
+        # MMS::Mail::Message and MMS::Mail::Message::Parsed instances
         $mmsparser->strip_characters("\r\n");
 
         # Set the regular expression map for accessors
@@ -103,23 +102,24 @@ SYNOPSIS
         $mmsparser->cleanse_map($map);
 
   Tutorial
-    A thorough tutorial can be accessed at
-    http://www.robl.co.uk/redirects/articles/mmsmailparser/
+    A tutorial can be accessed at
+    http://www.monkeyhelper.com/2006/02/roll_your_own_flickrpoddr_or_v.html
 
 METHODS
-    The following are the top-level methods of MMS::Mail::Parser object.
+    The following are the top-level methods of MMS::Mail::Parser class.
 
   Constructor
     "new()"
-        Return a new MMS::Mail::Parser object. Valid attributes are:
+        Return a new MMS::Mail::Parser instance. Valid attributes are:
 
         "mime_parser" MIME::Parser
             Passed as a hash reference, "parser" specifies the MIME::Parser
-            object to use instead of MMS::Mail::Parser creating it's own.
+            instance to use instead of MMS::Mail::Parser creating it's own.
 
         "debug" INTEGER
             Passed as a hash reference, "debug" determines whether debuging
-            information is outputted to standard error (defaults to 0).
+            information is outputted to standard error (defaults to 0 - no
+            debug output).
 
         "strip_characters" STRING
             Passed as a hash reference, "strip_characters" defines the
@@ -134,55 +134,55 @@ METHODS
 
   Regular Methods
     "parse" INSTREAM
-        Instance method - Returns an MMS::Mail::Message object by parsing
+        Instance method - Returns an MMS::Mail::Message instance by parsing
         the input stream INSTREAM
 
     "parse_data" DATA
-        Instance method - Returns an MMS::Mail::Message object by parsing
+        Instance method - Returns an MMS::Mail::Message instance by parsing
         the in memory string DATA
 
     "parse_open" EXPR
-        Instance method - Returns an MMS::Mail::Message object by parsing
+        Instance method - Returns an MMS::Mail::Message instance by parsing
         the file specified in EXPR
 
     "parse_two" HEADFILE, BODYFILE
-        Instance method - Returns an MMS::Mail::Message object by parsing
+        Instance method - Returns an MMS::Mail::Message instance by parsing
         the header and body file specified in HEADFILE and BODYFILE
         filenames
 
     "provider_parse" MMS::MailMessage
-        Instance method - Returns an MMS::Mail::Message::Parsed object by
+        Instance method - Returns an MMS::Mail::Message::Parsed instance by
         attempting to discover the network provider the message was sent
-        through and parsing through the appropriate MMS::ProviderMailParser.
-        If an MMS::MailMessage object is supplied as an argument then the
+        through and parsing with the appropriate MMS::Mail::Provider. If an
+        MMS::Mail::Message instance is supplied as an argument then the
         "provider_parse" method will parse the supplied MMS::Mail::Message
-        object. If a provider has been set via the provider method then that
-        parser will be used by the "provider_parse" method instead of
+        instance. If a provider has been set via the provider method then
+        that parser will be used by the "provider_parse" method instead of
         attempting to discover the network provider from the
-        MMS::Mail::Message.
+        MMS::Mail::Message attributes.
 
     "output_dir" DIRECTORY
         Instance method - Returns the "output_dir" parameter used with the
-        MIME::Parser object when invoked with no argument supplied. When an
-        argument is supplied it sets the "output_dir" property used by the
-        MIME::Parser to the value of the argument supplied.
+        MIME::Parser instance when invoked with no argument supplied. When
+        an argument is supplied it sets the "output_dir" property used by
+        the MIME::Parser to the value of the argument supplied.
 
     "mime_parser" MIME::Parser
-        Instance method - Returns the MIME::Parser object used by
+        Instance method - Returns the MIME::Parser instance used by
         MMS::Mail::Parser (if created) when invoked with no argument
         supplied. When an argument is supplied it sets the MIME::Parser
-        object used by MMS::Mail::Parser to parse messages.
+        instance used by the MMS::Mail::Parser instance to parse messages.
 
     "provider" MMS::Mail::Provider
-        Instance method - Returns an object for the currently set provider
+        Instance method - Returns an instance for the currently set provider
         property when invoked with no argument supplied. When an argument is
-        supplied it sets the provider to the supplied object.
+        supplied it sets the provider to the supplied instance.
 
     "strip_characters" STRING
         Instance method - Returns the characters to be stripped from the
-        returned MMS::Mail::Message and MMS::Mail::Message::Parsed objects.
-        When an argument is supplied it sets the strip characters to the
-        supplied string.
+        returned MMS::Mail::Message and MMS::Mail::Message::Parsed
+        instances. When an argument is supplied it sets the strip characters
+        to the supplied string.
 
     "cleanse_map" HASHREF
         Instance method - This method allows a regular expression or
@@ -197,7 +197,7 @@ METHODS
 
     "errors"
         Instance method - Returns the error stack used by the
-        MMS::Mail::Parser object as an array reference.
+        MMS::Mail::Parser instance as an array reference.
 
     "last_error"
         Instance method - Returns the last error from the stack.
