@@ -29,11 +29,11 @@ MMS::Mail::Parser - A class for parsing MMS (or picture) messages via email.
 
 =head1 VERSION
 
-Version 0.10
+Version 0.11
 
 =cut
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 =head1 SYNOPSIS
 
@@ -498,7 +498,7 @@ sub _decipher {
     if (defined($@) && $@) { return undef; }
     $self->provider($provider);
     return $provider->parse($self->message);
-  } elsif ($self->message->header_from =~ /mediamessaging.o2.co.uk$/) {
+  } elsif ($self->message->header_from =~ /mediamessaging.o2.co.uk/) {
     print STDERR "UK02 message type detected\n" if ($self->debug);
     my $provider = eval { new MMS::Mail::Provider::UK02 };
     if (defined($@) && $@) { return undef; }
