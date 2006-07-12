@@ -29,11 +29,11 @@ MMS::Mail::Parser - A class for parsing MMS (or picture) messages via email.
 
 =head1 VERSION
 
-Version 0.11
+Version 0.12
 
 =cut
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 =head1 SYNOPSIS
 
@@ -504,7 +504,7 @@ sub _decipher {
     if (defined($@) && $@) { return undef; }
     $self->provider($provider);
     return $provider->parse($self->message);
-  } elsif ($self->message->header_from =~ /orangemms.net$/) {
+  } elsif ($self->message->header_from =~ /orangemms.net$/ || $self->message->header_from =~ /orange.net$/) {
     print STDERR "UKOrange message type detected\n" if ($self->debug);
     my $provider = eval { new MMS::Mail::Provider::UKOrange };
     if (defined($@) && $@) { return undef; }

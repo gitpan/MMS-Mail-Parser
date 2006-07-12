@@ -1,5 +1,7 @@
 Revision history for MMS-Mail-Parser
 
+0.12	06-Jul-2006 / 18:32
+	Added orange.net to orange message detection
 0.11	13-Mar-2006 / 14:31
 	Changed 02 message detection - patch from C May 
 0.10    07-Feb-2006 / 20:30

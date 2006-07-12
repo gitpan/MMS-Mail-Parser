@@ -3,7 +3,7 @@ NAME
     email.
 
 VERSION
-    Version 0.11
+    Version 0.12
 
 SYNOPSIS
     This class takes an MMS message and parses it into two 'standard'
