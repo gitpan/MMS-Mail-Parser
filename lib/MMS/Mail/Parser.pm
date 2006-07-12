@@ -29,11 +29,11 @@ MMS::Mail::Parser - A class for parsing MMS (or picture) messages via email.
 
 =head1 VERSION
 
-Version 0.12
+Version 0.13
 
 =cut
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 =head1 SYNOPSIS
 
@@ -412,6 +412,10 @@ sub _recurse_message {
     $self->message->header_from($header->get('From'));
     $self->message->header_to($header->get('To'));
     $self->message->header_subject($header->get('Subject'));
+    my $received = $header->get('Received', 0);
+    if ($received=~m/\[(.+)\.(.+)\.(.+)\.(.+)\]/) {
+      $self->message->header_received_from(join(".",$1,$2,$3,$4));
+    }
     print STDERR "Parsed Headers\n" if ($self->debug);
   }
 

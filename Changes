@@ -1,5 +1,7 @@
 Revision history for MMS-Mail-Parser
 
+0.13	06-Jul-2006 / 18:47
+	Added storage of header_received_from
 0.12	06-Jul-2006 / 18:32
 	Added orange.net to orange message detection
 0.11	13-Mar-2006 / 14:31
