@@ -10,7 +10,7 @@ WriteMakefile(
     PL_FILES            => {},
     PREREQ_PM => {
         'Test::More' => 0,
-	'MMS::Mail::Message' => 0.05,
+	'MMS::Mail::Message' => 0.06,
 	'MMS::Mail::Message::Parsed' => 0.06,
 	'MIME::Parser' => 5.4,
 	'MMS::Mail::Provider' => 0.06,
